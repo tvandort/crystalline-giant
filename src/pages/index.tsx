@@ -25,7 +25,7 @@ export default function Home({ initialAbility }: HomeProps) {
           setAbilities(card.Abilities);
         }}
       >
-        Gain Ability
+        Roll
       </button>
       <ul>
         {abilities.map((ability) => (
