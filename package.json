@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "yarn compile && yarn lint && next dev",
+    "dev": "yarn clint && next dev",
+    "compile": "tsc -p tsconfig.app.json && tsc -p tsconfig.test.json",
+    "clint": "yarn compile && yarn lint",
     "build": "next build",
     "start": "next start",
-    "test": "yarn jest --watch",
-    "test:ci": "yarn jest",
-    "lint": "eslint --fix --ext .js,.ts,.tsx .",
-    "compile": "tsc -p tsconfig.app.json && tsc -p tsconfig.test.json"
+    "test": "yarn clint && yarn jest --watch",
+    "test:ci": "yarn clint && yarn jest",
+    "lint": "eslint --fix --ext .js,.ts,.tsx ."
   },
   "dependencies": {
     "@types/jest": "^26.0.15",
