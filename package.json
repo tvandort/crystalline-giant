@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "yarn compile && yarn lint && next dev",
     "build": "next build",
     "start": "next start",
     "test": "yarn jest --watch",
@@ -20,6 +20,7 @@
     "babel-eslint": "^10.0.0",
     "eslint": "^7.5.0",
     "eslint-config-react-app": "^6.0.0",
+    "eslint-loader": "^4.0.2",
     "eslint-plugin-flowtype": "^5.2.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
