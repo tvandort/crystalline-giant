@@ -1,15 +1,24 @@
-import { CrystallineGiant } from '@app/logic/crystallineGiant';
+import {
+  Ability,
+  AllAbilities,
+  CrystallineGiant,
+  Pick
+} from '@app/logic/crystallineGiant';
+import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 
-const card = new CrystallineGiant();
+interface HomeProps {
+  initialAbility: Ability;
+}
 
-export default function Home() {
+export default function Home({ initialAbility }: HomeProps) {
+  const [card] = useState(new CrystallineGiant({ initialAbility }));
   const [abilities, setAbilities] = useState(card.Abilities);
 
   return (
     <div>
-      Your Crystalline Giant:
+      Your Crystalline Giant:&nbsp;
       <button
         onClick={() => {
           card.gainAbility();
@@ -26,3 +35,11 @@ export default function Home() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  return {
+    props: {
+      initialAbility: Pick(AllAbilities)
+    }
+  };
+};
