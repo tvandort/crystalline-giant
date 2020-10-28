@@ -43,12 +43,9 @@ interface AbilityPicker {
 }
 
 interface CrystallineGiantOptions {
-  picker: AbilityPicker;
+  picker?: AbilityPicker;
+  initialAbility?: Ability;
 }
-
-const defaults: { picker: AbilityPicker } = {
-  picker: Pick
-};
 
 export function Pick(abilities: Abilities): Ability {
   if (abilities.length < 1) {
@@ -65,13 +62,20 @@ export class CrystallineGiant {
   private ungainedAbilities: Abilities = AllAbilities;
   private abilities: Abilities = [];
 
-  constructor({ picker }: CrystallineGiantOptions = defaults) {
+  constructor({ picker = Pick, initialAbility }: CrystallineGiantOptions = {}) {
     this.pick = picker;
-    this.gainAbility();
+
+    if (initialAbility) {
+      this.removeUngainedAbility(initialAbility);
+      this.abilities = [initialAbility];
+    } else {
+      this.abilities = [];
+      this.gainAbility();
+    }
   }
 
   get Abilities(): Abilities {
-    return this.abilities;
+    return [...this.abilities];
   }
 
   get CanGainAbility(): boolean {
@@ -84,9 +88,13 @@ export class CrystallineGiant {
     }
 
     const newAbility = this.pick(this.ungainedAbilities);
+    this.removeUngainedAbility(newAbility);
+    this.abilities.push(newAbility);
+  };
+
+  private removeUngainedAbility(newAbility: string) {
     this.ungainedAbilities = this.ungainedAbilities.filter(
       (ability) => ability !== newAbility
     );
-    this.abilities.push(newAbility);
-  };
+  }
 }

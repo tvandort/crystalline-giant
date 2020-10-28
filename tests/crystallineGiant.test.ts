@@ -7,25 +7,28 @@ import {
   Pick
 } from '@app/logic/crystallineGiant';
 
-describe(CrystallineGiant, () => {
+describe.each([
+  ['without initial ability', () => new CrystallineGiant()],
+  [
+    'with initial ability',
+    () => new CrystallineGiant({ initialAbility: 'flying' })
+  ]
+])('crystalline giant %p', (_, getCard) => {
   test('giant starts with an ability', () => {
-    const card = new CrystallineGiant();
-
+    const card = getCard();
     expect(card.Abilities.length).toEqual(1);
     expect(AllAbilities).toContain(card.Abilities[0]);
   });
 
   test('giant can gain a new ability', () => {
-    const card = new CrystallineGiant();
-
+    const card = getCard();
     card.gainAbility();
 
     expect(card.Abilities.length).toEqual(2);
   });
 
   test('giant cannot gain more than 10 abilities', () => {
-    const card = new CrystallineGiant();
-
+    const card = getCard();
     for (var index = 0; index < 11; index++) {
       card.gainAbility();
     }
@@ -33,9 +36,16 @@ describe(CrystallineGiant, () => {
     expect(card.Abilities.length).toEqual(10);
   });
 
-  test('giant knows it cannot gain abilities', () => {
-    const card = new CrystallineGiant();
+  test('ability array recreated every time for react', () => {
+    const card = getCard();
+    const abilities1 = card.Abilities;
+    const abilities2 = card.Abilities;
 
+    expect(abilities1).not.toBe(abilities2);
+  });
+
+  it('giant knows it cannot gain abilities', () => {
+    const card = getCard();
     expect(card.CanGainAbility).toEqual(true);
 
     for (var index = 0; index < 11; index++) {
