@@ -32,6 +32,18 @@ export default function Home({ initialAbility }: HomeProps) {
           <li key={ability}>{ability}</li>
         ))}
       </ul>
+      <br />
+      <br />
+      <br />
+      <br />
+      <button
+        onClick={() => {
+          card.reset();
+          setAbilities(card.Abilities);
+        }}
+      >
+        Reset
+      </button>
     </div>
   );
 }
