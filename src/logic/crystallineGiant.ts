@@ -97,4 +97,11 @@ export class CrystallineGiant {
       (ability) => ability !== newAbility
     );
   }
+
+  reset = () => {
+    this.abilities = [];
+    this.ungainedAbilities = AllAbilities;
+
+    this.gainAbility();
+  };
 }

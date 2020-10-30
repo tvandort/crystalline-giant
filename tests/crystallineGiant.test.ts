@@ -44,7 +44,7 @@ describe.each([
     expect(abilities1).not.toBe(abilities2);
   });
 
-  it('giant knows it cannot gain abilities', () => {
+  test('giant knows it cannot gain abilities', () => {
     const card = getCard();
     expect(card.CanGainAbility).toEqual(true);
 
@@ -53,6 +53,21 @@ describe.each([
     }
 
     expect(card.CanGainAbility).toEqual(false);
+  });
+
+  test('giant can be reset', () => {
+    const card = getCard();
+    expect(card.CanGainAbility).toEqual(true);
+
+    for (var index = 0; index < 11; index++) {
+      card.gainAbility();
+    }
+
+    expect(card.CanGainAbility).toEqual(false);
+
+    card.reset();
+
+    expect(card.Abilities.length).toBe(1);
   });
 });
 
