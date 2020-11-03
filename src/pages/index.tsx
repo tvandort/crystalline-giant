@@ -1,26 +1,23 @@
 import {
   Ability,
   AllAbilities,
-  CrystallineGiant,
   CrystallineGiantInitializer,
   CrystallineGiantReducer,
   CrystallineGiantWrapper,
   Pick
 } from '@app/logic/crystallineGiant';
+import { useLocalStorage } from '@app/logic/useLocalStorage';
+import { stat } from 'fs';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 
 interface HomeProps {
   initialAbility: Ability;
 }
 
 export default function Home({ initialAbility }: HomeProps) {
-  const [state, dispatch] = useReducer(
-    CrystallineGiantReducer,
-    CrystallineGiantInitializer(initialAbility)
-  );
-  const card = new CrystallineGiantWrapper(state, dispatch);
+  const card = useCrystallineGiant(initialAbility);
 
   return (
     <div>
@@ -64,4 +61,18 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
       initialAbility: Pick(AllAbilities)
     }
   };
+};
+
+const useCrystallineGiant = (initialAbility: Ability) => {
+  const [stored, setStored] = useLocalStorage(
+    'giant',
+    CrystallineGiantInitializer(initialAbility)
+  );
+  const [state, dispatch] = useReducer(CrystallineGiantReducer, stored);
+
+  useEffect(() => {
+    setStored(state);
+  }, [setStored, state]);
+
+  return new CrystallineGiantWrapper(state, dispatch);
 };
