@@ -68,32 +68,34 @@ export function Pick(abilities: Abilities): Ability {
 interface CrystallineGiantState {
   ungained: Abilities;
   gained: Abilities;
-  canGainAbility: boolean;
 }
+
+export type CrystallineGiantActions = 'GAIN_ABILITY' | 'RESET' | 'INITIALIZE';
+
+const gainAbility = (state: CrystallineGiantState) => {
+  function CanGainAbility(abilities: Abilities) {
+    return abilities.length > 0;
+  }
+  if (!CanGainAbility(state.ungained)) {
+    return state;
+  }
+
+  const newAbility = Pick(state.ungained);
+  const ungained = state.ungained.filter((ability) => ability !== newAbility);
+  return {
+    gained: [...state.gained, newAbility],
+    ungained,
+    canGainAbility: CanGainAbility(ungained)
+  };
+};
 
 export function CrystallineGiantReducer(
   state: CrystallineGiantState,
-  action: 'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'
+  action: CrystallineGiantActions
 ): CrystallineGiantState {
-  const CanGainAbility = (abilities: Abilities) => {
-    return abilities.length > 0;
-  };
-
   switch (action) {
     case 'GAIN_ABILITY': {
-      if (!CanGainAbility(state.ungained)) {
-        return state;
-      }
-
-      const newAbility = Pick(state.ungained);
-      const ungained = state.ungained.filter(
-        (ability) => ability !== newAbility
-      );
-      return {
-        gained: [...state.gained, newAbility],
-        ungained,
-        canGainAbility: CanGainAbility(ungained)
-      };
+      return gainAbility(state);
     }
     case 'RESET': {
       return CrystallineGiantInitializer();
@@ -112,8 +114,7 @@ export function CrystallineGiantInitializer(initialAbility?: Ability) {
   return CrystallineGiantReducer(
     {
       gained: [initialAbility],
-      ungained: AllAbilities.filter((ability) => ability !== initialAbility),
-      canGainAbility: true
+      ungained: AllAbilities.filter((ability) => ability !== initialAbility)
     },
     'INITIALIZE'
   );
@@ -121,11 +122,11 @@ export function CrystallineGiantInitializer(initialAbility?: Ability) {
 
 export class CrystallineGiantWrapper {
   private state: CrystallineGiantState;
-  private dispatch: Dispatch<'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'>;
+  private dispatch: Dispatch<CrystallineGiantActions>;
 
   constructor(
     state: CrystallineGiantState,
-    dispatch: Dispatch<'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'>
+    dispatch: Dispatch<CrystallineGiantActions>
   ) {
     this.state = state;
     this.dispatch = dispatch;
@@ -136,6 +137,7 @@ export class CrystallineGiantWrapper {
   }
 
   get CanGainAbility(): boolean {
+    console.log(this.state.ungained);
     return this.state.ungained.length > 0;
   }
 
@@ -149,25 +151,32 @@ export class CrystallineGiantWrapper {
 }
 
 export class CrystallineGiant {
-  private state: CrystallineGiantState;
+  private wrapper: CrystallineGiantWrapper;
 
   constructor({ initialAbility }: CrystallineGiantOptions = {}) {
-    this.state = CrystallineGiantInitializer(initialAbility);
+    let state = CrystallineGiantInitializer(initialAbility);
+
+    const dispatch = (action: CrystallineGiantActions) => {
+      state = CrystallineGiantReducer(state, action);
+      this.wrapper = new CrystallineGiantWrapper(state, dispatch);
+    };
+
+    this.wrapper = new CrystallineGiantWrapper(state, dispatch);
   }
 
   get Abilities(): Abilities {
-    return this.state.gained;
+    return this.wrapper.Abilities;
   }
 
   get CanGainAbility(): boolean {
-    return this.state.ungained.length > 0;
+    return this.wrapper.CanGainAbility;
   }
 
   gainAbility = () => {
-    this.state = CrystallineGiantReducer(this.state, 'GAIN_ABILITY');
+    this.wrapper.gainAbility();
   };
 
   reset = () => {
-    this.state = CrystallineGiantReducer(this.state, 'RESET');
+    this.wrapper.reset();
   };
 }
