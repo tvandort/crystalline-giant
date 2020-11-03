@@ -1,3 +1,5 @@
+import { Dispatch } from 'react';
+
 const Flying = 'flying';
 const FirstStrike = 'first strike';
 const Deathtouch = 'deathtouch';
@@ -73,23 +75,24 @@ export function CrystallineGiantReducer(
   state: CrystallineGiantState,
   action: 'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'
 ): CrystallineGiantState {
-  const CanGainAbility = () => {
-    return state.ungained.length > 0;
+  const CanGainAbility = (abilities: Abilities) => {
+    return abilities.length > 0;
   };
 
   switch (action) {
     case 'GAIN_ABILITY': {
-      if (!CanGainAbility()) {
+      if (!CanGainAbility(state.ungained)) {
         return state;
       }
 
       const newAbility = Pick(state.ungained);
+      const ungained = state.ungained.filter(
+        (ability) => ability !== newAbility
+      );
       return {
         gained: [...state.gained, newAbility],
-        ungained: [
-          ...state.ungained.filter((ability) => ability !== newAbility)
-        ],
-        canGainAbility: CanGainAbility()
+        ungained,
+        canGainAbility: CanGainAbility(ungained)
       };
     }
     case 'RESET': {
@@ -114,6 +117,35 @@ export function CrystallineGiantInitializer(initialAbility?: Ability) {
     },
     'INITIALIZE'
   );
+}
+
+export class CrystallineGiantWrapper {
+  private state: CrystallineGiantState;
+  private dispatch: Dispatch<'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'>;
+
+  constructor(
+    state: CrystallineGiantState,
+    dispatch: Dispatch<'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'>
+  ) {
+    this.state = state;
+    this.dispatch = dispatch;
+  }
+
+  get Abilities(): Abilities {
+    return this.state.gained;
+  }
+
+  get CanGainAbility(): boolean {
+    return this.state.ungained.length > 0;
+  }
+
+  gainAbility = () => {
+    this.dispatch('GAIN_ABILITY');
+  };
+
+  reset = () => {
+    this.dispatch('RESET');
+  };
 }
 
 export class CrystallineGiant {
