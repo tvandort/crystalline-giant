@@ -2,19 +2,25 @@ import {
   Ability,
   AllAbilities,
   CrystallineGiant,
+  CrystallineGiantInitializer,
+  CrystallineGiantReducer,
+  CrystallineGiantWrapper,
   Pick
 } from '@app/logic/crystallineGiant';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 interface HomeProps {
   initialAbility: Ability;
 }
 
 export default function Home({ initialAbility }: HomeProps) {
-  const [card] = useState(new CrystallineGiant({ initialAbility }));
-  const [abilities, setAbilities] = useState(card.Abilities);
+  const [state, dispatch] = useReducer(
+    CrystallineGiantReducer,
+    CrystallineGiantInitializer(initialAbility)
+  );
+  const card = new CrystallineGiantWrapper(state, dispatch);
 
   return (
     <div>
@@ -22,16 +28,32 @@ export default function Home({ initialAbility }: HomeProps) {
       <button
         onClick={() => {
           card.gainAbility();
-          setAbilities(card.Abilities);
         }}
+        disabled={!card.CanGainAbility}
+        title={
+          card.CanGainAbility
+            ? 'Roll to gain another ability.'
+            : 'Cannot roll; all abilities gained.'
+        }
       >
         Roll
       </button>
       <ul>
-        {abilities.map((ability) => (
+        {card.Abilities.map((ability) => (
           <li key={ability}>{ability}</li>
         ))}
       </ul>
+      <br />
+      <br />
+      <br />
+      <br />
+      <button
+        onClick={() => {
+          card.reset();
+        }}
+      >
+        Reset
+      </button>
     </div>
   );
 }

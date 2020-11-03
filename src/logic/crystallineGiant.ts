@@ -1,33 +1,46 @@
+import { Dispatch } from 'react';
+
+const Flying = 'flying';
+const FirstStrike = 'first strike';
+const Deathtouch = 'deathtouch';
+const Hexproof = 'hexproof';
+const Lifelink = 'lifelink';
+const Menace = 'menace';
+const Reach = 'reach';
+const Trample = 'trample';
+const Vigilance = 'vigilance';
+const PlusOnePlusOne = '+1/+1';
+
 export type Ability =
-  | 'flying'
-  | 'first strike'
-  | 'deathtouch'
-  | 'hexproof'
-  | 'lifelink'
-  | 'menace'
-  | 'reach'
-  | 'trample'
-  | 'vigilance'
-  | '+1/+1';
+  | typeof Flying
+  | typeof FirstStrike
+  | typeof Deathtouch
+  | typeof Hexproof
+  | typeof Lifelink
+  | typeof Menace
+  | typeof Reach
+  | typeof Trample
+  | typeof Vigilance
+  | typeof PlusOnePlusOne;
 
 export type Abilities = Ability[];
 
 export const AbilityValues: { [key in Ability]: Ability } = {
-  flying: 'flying',
-  'first strike': 'first strike',
-  '+1/+1': '+1/+1',
-  deathtouch: 'deathtouch',
-  hexproof: 'hexproof',
-  lifelink: 'lifelink',
-  menace: 'menace',
-  reach: 'reach',
-  trample: 'trample',
-  vigilance: 'vigilance'
+  [Flying]: Flying,
+  [FirstStrike]: FirstStrike,
+  [PlusOnePlusOne]: PlusOnePlusOne,
+  [Deathtouch]: Deathtouch,
+  [Hexproof]: Hexproof,
+  [Lifelink]: Lifelink,
+  [Menace]: Menace,
+  [Reach]: Reach,
+  [Trample]: Trample,
+  [Vigilance]: Vigilance
 };
 
 export const AllAbilities: Abilities = [
   AbilityValues.flying,
-  AbilityValues['first strike'],
+  AbilityValues[FirstStrike],
   AbilityValues.deathtouch,
   AbilityValues.hexproof,
   AbilityValues.lifelink,
@@ -35,15 +48,10 @@ export const AllAbilities: Abilities = [
   AbilityValues.reach,
   AbilityValues.trample,
   AbilityValues.vigilance,
-  AbilityValues['+1/+1']
+  AbilityValues[PlusOnePlusOne]
 ];
 
-interface AbilityPicker {
-  (abilities: Abilities): Ability;
-}
-
 interface CrystallineGiantOptions {
-  picker?: AbilityPicker;
   initialAbility?: Ability;
 }
 
@@ -57,44 +65,109 @@ export function Pick(abilities: Abilities): Ability {
   return abilities[nextAbilityIndex];
 }
 
-export class CrystallineGiant {
-  private pick: AbilityPicker;
-  private ungainedAbilities: Abilities = AllAbilities;
-  private abilities: Abilities = [];
+interface CrystallineGiantState {
+  ungained: Abilities;
+  gained: Abilities;
+  canGainAbility: boolean;
+}
 
-  constructor({ picker = Pick, initialAbility }: CrystallineGiantOptions = {}) {
-    this.pick = picker;
+export function CrystallineGiantReducer(
+  state: CrystallineGiantState,
+  action: 'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'
+): CrystallineGiantState {
+  const CanGainAbility = (abilities: Abilities) => {
+    return abilities.length > 0;
+  };
 
-    if (initialAbility) {
-      this.removeUngainedAbility(initialAbility);
-      this.abilities = [initialAbility];
-    } else {
-      this.abilities = [];
-      this.gainAbility();
+  switch (action) {
+    case 'GAIN_ABILITY': {
+      if (!CanGainAbility(state.ungained)) {
+        return state;
+      }
+
+      const newAbility = Pick(state.ungained);
+      const ungained = state.ungained.filter(
+        (ability) => ability !== newAbility
+      );
+      return {
+        gained: [...state.gained, newAbility],
+        ungained,
+        canGainAbility: CanGainAbility(ungained)
+      };
     }
+    case 'RESET': {
+      return CrystallineGiantInitializer();
+    }
+    case 'INITIALIZE': {
+      return state;
+    }
+    default: {
+      return state;
+    }
+  }
+}
+
+export function CrystallineGiantInitializer(initialAbility?: Ability) {
+  initialAbility = initialAbility ?? Pick(AllAbilities);
+  return CrystallineGiantReducer(
+    {
+      gained: [initialAbility],
+      ungained: AllAbilities.filter((ability) => ability !== initialAbility),
+      canGainAbility: true
+    },
+    'INITIALIZE'
+  );
+}
+
+export class CrystallineGiantWrapper {
+  private state: CrystallineGiantState;
+  private dispatch: Dispatch<'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'>;
+
+  constructor(
+    state: CrystallineGiantState,
+    dispatch: Dispatch<'GAIN_ABILITY' | 'RESET' | 'INITIALIZE'>
+  ) {
+    this.state = state;
+    this.dispatch = dispatch;
   }
 
   get Abilities(): Abilities {
-    return [...this.abilities];
+    return this.state.gained;
   }
 
   get CanGainAbility(): boolean {
-    return this.ungainedAbilities.length > 0;
+    return this.state.ungained.length > 0;
   }
 
   gainAbility = () => {
-    if (!this.CanGainAbility) {
-      return;
-    }
-
-    const newAbility = this.pick(this.ungainedAbilities);
-    this.removeUngainedAbility(newAbility);
-    this.abilities.push(newAbility);
+    this.dispatch('GAIN_ABILITY');
   };
 
-  private removeUngainedAbility(newAbility: string) {
-    this.ungainedAbilities = this.ungainedAbilities.filter(
-      (ability) => ability !== newAbility
-    );
+  reset = () => {
+    this.dispatch('RESET');
+  };
+}
+
+export class CrystallineGiant {
+  private state: CrystallineGiantState;
+
+  constructor({ initialAbility }: CrystallineGiantOptions = {}) {
+    this.state = CrystallineGiantInitializer(initialAbility);
   }
+
+  get Abilities(): Abilities {
+    return this.state.gained;
+  }
+
+  get CanGainAbility(): boolean {
+    return this.state.ungained.length > 0;
+  }
+
+  gainAbility = () => {
+    this.state = CrystallineGiantReducer(this.state, 'GAIN_ABILITY');
+  };
+
+  reset = () => {
+    this.state = CrystallineGiantReducer(this.state, 'RESET');
+  };
 }
