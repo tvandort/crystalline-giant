@@ -39,6 +39,9 @@ describe.each([
   test('ability array recreated every time for react', () => {
     const card = getCard();
     const abilities1 = card.Abilities;
+
+    card.gainAbility();
+
     const abilities2 = card.Abilities;
 
     expect(abilities1).not.toBe(abilities2);
