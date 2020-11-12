@@ -4,14 +4,18 @@ import {
   AbilityValues,
   AllAbilities,
   CrystallineGiant,
+  CrystallineGiantActions,
+  CrystallineGiantInitializer,
+  CrystallineGiantOptions,
+  CrystallineGiantReducer,
   Pick
 } from '@app/logic/crystallineGiant';
 
 describe.each([
-  ['without initial ability', () => new CrystallineGiant()],
+  ['without initial ability', () => new CrystallineGiantTester()],
   [
     'with initial ability',
-    () => new CrystallineGiant({ initialAbility: 'flying' })
+    () => new CrystallineGiantTester({ initialAbility: 'flying' })
   ]
 ])('crystalline giant %p', (_, getCard) => {
   test('giant starts with an ability', () => {
@@ -109,3 +113,34 @@ describe('randomizer', () => {
     }
   );
 });
+
+class CrystallineGiantTester {
+  private wrapper: CrystallineGiant;
+
+  constructor({ initialAbility }: CrystallineGiantOptions = {}) {
+    let state = CrystallineGiantInitializer(initialAbility);
+
+    const dispatch = (action: CrystallineGiantActions) => {
+      state = CrystallineGiantReducer(state, action);
+      this.wrapper = new CrystallineGiant(state, dispatch);
+    };
+
+    this.wrapper = new CrystallineGiant(state, dispatch);
+  }
+
+  get Abilities(): Abilities {
+    return this.wrapper.Abilities;
+  }
+
+  get CanGainAbility(): boolean {
+    return this.wrapper.CanGainAbility;
+  }
+
+  gainAbility = () => {
+    this.wrapper.gainAbility();
+  };
+
+  reset = () => {
+    this.wrapper.reset();
+  };
+}

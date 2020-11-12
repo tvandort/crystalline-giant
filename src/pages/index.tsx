@@ -1,10 +1,9 @@
 import {
   Ability,
   AllAbilities,
-  CrystallineGiant,
   CrystallineGiantInitializer,
   CrystallineGiantReducer,
-  CrystallineGiantWrapper,
+  CrystallineGiant,
   Pick
 } from '@app/logic/crystallineGiant';
 import { GetServerSideProps } from 'next';
@@ -20,7 +19,7 @@ export default function Home({ initialAbility }: HomeProps) {
     CrystallineGiantReducer,
     CrystallineGiantInitializer(initialAbility)
   );
-  const card = new CrystallineGiantWrapper(state, dispatch);
+  const card = new CrystallineGiant(state, dispatch);
 
   return (
     <div>
