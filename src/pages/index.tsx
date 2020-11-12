@@ -1,7 +1,6 @@
 import {
   Ability,
   AllAbilities,
-  CrystallineGiantTester,
   CrystallineGiantInitializer,
   CrystallineGiantReducer,
   CrystallineGiant,
