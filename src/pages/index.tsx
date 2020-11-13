@@ -1,3 +1,4 @@
+import React from 'react';
 import { Ability, AllAbilities, Pick } from '@app/logic/crystallineGiant';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
