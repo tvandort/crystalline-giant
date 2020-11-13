@@ -30,7 +30,7 @@
     "allowJs": true,
 
     "jsx": "preserve",
-    "jsxFactory": "React.createElement",
+    // "jsxFactory": "React.createElement",
 
     "sourceMap": true
   },
