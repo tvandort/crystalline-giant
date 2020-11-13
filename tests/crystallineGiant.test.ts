@@ -4,7 +4,7 @@ import {
   AbilityValues,
   AllAbilities,
   CrystallineGiant,
-  CrystallineGiantActions,
+  CrystallineGiantMessages,
   CrystallineGiantInitializer,
   CrystallineGiantReducer,
   Pick
@@ -117,7 +117,7 @@ class CrystallineGiantTester {
   constructor() {
     let state = CrystallineGiantInitializer();
 
-    const dispatch = (action: CrystallineGiantActions) => {
+    const dispatch = (action: CrystallineGiantMessages) => {
       state = CrystallineGiantReducer(state, action);
       this.wrapper = new CrystallineGiant(state, dispatch);
     };

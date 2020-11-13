@@ -64,18 +64,17 @@ export function Pick(abilities: Abilities): Ability {
 interface CrystallineGiantState {
   ungained: Abilities;
   gained: Abilities;
-  canGainAbility: boolean;
 }
 
 export function CrystallineGiantReducer(
   state: CrystallineGiantState,
-  action: CrystallineGiantActions
+  message: CrystallineGiantMessages
 ): CrystallineGiantState {
   const CanGainAbility = (abilities: Abilities) => {
     return abilities.length > 0;
   };
 
-  switch (action) {
+  switch (message.action) {
     case 'GAIN_ABILITY': {
       if (!CanGainAbility(state.ungained)) {
         return state;
@@ -87,12 +86,20 @@ export function CrystallineGiantReducer(
       );
       return {
         gained: [...state.gained, newAbility],
-        ungained,
-        canGainAbility: CanGainAbility(ungained)
+        ungained
       };
     }
     case 'RESET': {
       return CrystallineGiantInitializer();
+    }
+    case 'ADD_ABILITY': {
+      const ungained = state.ungained.filter(
+        (ability) => ability !== message.ability
+      );
+      return {
+        gained: [...state.gained, message.ability],
+        ungained
+      };
     }
     default: {
       return state;
@@ -103,20 +110,22 @@ export function CrystallineGiantReducer(
 export function CrystallineGiantInitializer(): CrystallineGiantState {
   return {
     gained: [],
-    ungained: AllAbilities,
-    canGainAbility: true
+    ungained: AllAbilities
   };
 }
 
-export type CrystallineGiantActions = 'GAIN_ABILITY' | 'RESET';
+export type CrystallineGiantMessages =
+  | { action: 'GAIN_ABILITY' }
+  | { action: 'RESET' }
+  | { action: 'ADD_ABILITY'; ability: Ability };
 
 export class CrystallineGiant {
   private state: CrystallineGiantState;
-  private dispatch: Dispatch<CrystallineGiantActions>;
+  private dispatch: Dispatch<CrystallineGiantMessages>;
 
   constructor(
     state: CrystallineGiantState,
-    dispatch: Dispatch<CrystallineGiantActions>
+    dispatch: Dispatch<CrystallineGiantMessages>
   ) {
     this.state = state;
     this.dispatch = dispatch;
@@ -130,11 +139,22 @@ export class CrystallineGiant {
     return this.state.ungained.length > 0;
   }
 
+  get UngainedAbilities(): Abilities {
+    return this.state.ungained;
+  }
+
   gainAbility = () => {
-    this.dispatch('GAIN_ABILITY');
+    this.dispatch({ action: 'GAIN_ABILITY' });
   };
 
   reset = () => {
-    this.dispatch('RESET');
+    this.dispatch({ action: 'RESET' });
+  };
+
+  addAbility = (ability: Ability) => {
+    this.dispatch({
+      action: 'ADD_ABILITY',
+      ability
+    });
   };
 }
