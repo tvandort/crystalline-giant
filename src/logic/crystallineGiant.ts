@@ -1,5 +1,4 @@
 import { Dispatch } from 'react';
-import { hasOnlyExpressionInitializer } from 'typescript';
 
 const Flying = 'flying';
 const FirstStrike = 'first strike';
@@ -52,10 +51,6 @@ export const AllAbilities: Abilities = [
   AbilityValues[PlusOnePlusOne]
 ];
 
-export interface CrystallineGiantOptions {
-  initialAbility?: Ability;
-}
-
 export function Pick(abilities: Abilities): Ability {
   if (abilities.length < 1) {
     throw new Error('Cannot pick from empty array.');
@@ -105,11 +100,10 @@ export function CrystallineGiantReducer(
   }
 }
 
-export function CrystallineGiantInitializer(initialAbility?: Ability) {
-  initialAbility = initialAbility ?? Pick(AllAbilities);
+export function CrystallineGiantInitializer(): CrystallineGiantState {
   return {
-    gained: [initialAbility],
-    ungained: AllAbilities.filter((ability) => ability !== initialAbility),
+    gained: [],
+    ungained: AllAbilities,
     canGainAbility: true
   };
 }

@@ -6,29 +6,26 @@ import {
   CrystallineGiant,
   CrystallineGiantActions,
   CrystallineGiantInitializer,
-  CrystallineGiantOptions,
   CrystallineGiantReducer,
   Pick
 } from '@app/logic/crystallineGiant';
 
-describe.each([
-  ['without initial ability', () => new CrystallineGiantTester()],
-  [
-    'with initial ability',
-    () => new CrystallineGiantTester({ initialAbility: 'flying' })
-  ]
-])('crystalline giant %p', (_, getCard) => {
-  test('giant starts with an ability', () => {
+const getCard = () => new CrystallineGiantTester();
+
+describe('crystalline giant', () => {
+  test('giant does not start with any abilities', () => {
     const card = getCard();
-    expect(card.Abilities.length).toEqual(1);
-    expect(AllAbilities).toContain(card.Abilities[0]);
+
+    expect(card.Abilities.length).toEqual(0);
   });
 
   test('giant can gain a new ability', () => {
     const card = getCard();
+    const originalCount = card.Abilities.length;
+
     card.gainAbility();
 
-    expect(card.Abilities.length).toEqual(2);
+    expect(card.Abilities.length).toEqual(originalCount + 1);
   });
 
   test('giant cannot gain more than 10 abilities', () => {
@@ -37,18 +34,18 @@ describe.each([
       card.gainAbility();
     }
 
-    expect(card.Abilities.length).toEqual(10);
+    expect(card.Abilities.length).toEqual(AllAbilities.length);
   });
 
   test('ability array recreated every time for react', () => {
     const card = getCard();
-    const abilities1 = card.Abilities;
+    const originalCopyOfAbilities = card.Abilities;
 
     card.gainAbility();
 
-    const abilities2 = card.Abilities;
+    const newCopyOfAbilities = card.Abilities;
 
-    expect(abilities1).not.toBe(abilities2);
+    expect(newCopyOfAbilities).not.toBe(originalCopyOfAbilities);
   });
 
   test('giant knows it cannot gain abilities', () => {
@@ -74,7 +71,7 @@ describe.each([
 
     card.reset();
 
-    expect(card.Abilities.length).toBe(1);
+    expect(card.Abilities.length).toBe(0);
   });
 });
 
@@ -117,8 +114,8 @@ describe('randomizer', () => {
 class CrystallineGiantTester {
   private wrapper: CrystallineGiant;
 
-  constructor({ initialAbility }: CrystallineGiantOptions = {}) {
-    let state = CrystallineGiantInitializer(initialAbility);
+  constructor() {
+    let state = CrystallineGiantInitializer();
 
     const dispatch = (action: CrystallineGiantActions) => {
       state = CrystallineGiantReducer(state, action);

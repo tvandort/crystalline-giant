@@ -7,8 +7,8 @@ import {
 } from '@app/logic/crystallineGiant';
 import { useReducer } from 'react';
 
-const View = ({ initialAbility }: { initialAbility: Ability }) => {
-  const card = useCrystallineGiant(initialAbility);
+const View = () => {
+  const card = useCrystallineGiant();
 
   return (
     <div>
@@ -47,10 +47,11 @@ const View = ({ initialAbility }: { initialAbility: Ability }) => {
 };
 
 export default View;
-function useCrystallineGiant(initialAbility: Ability) {
+
+function useCrystallineGiant() {
   const [state, dispatch] = useReducer(
     CrystallineGiantReducer,
-    CrystallineGiantInitializer(initialAbility)
+    CrystallineGiantInitializer()
   );
   const card = new CrystallineGiantState(state, dispatch);
   return card;
