@@ -7,7 +7,8 @@ import {
   CrystallineGiantMessages,
   CrystallineGiantInitializer,
   CrystallineGiantReducer,
-  Pick
+  Pick,
+  CrystallineGiantState
 } from '@app/logic/crystallineGiant';
 
 const getCard = () => new CrystallineGiantTester();
@@ -23,7 +24,7 @@ describe('crystalline giant', () => {
     const card = getCard();
     const originalCount = card.Abilities.length;
 
-    card.gainAbility();
+    card.rollAbility();
 
     expect(card.Abilities.length).toEqual(originalCount + 1);
   });
@@ -31,7 +32,7 @@ describe('crystalline giant', () => {
   test('giant cannot gain more than 10 abilities', () => {
     const card = getCard();
     for (var index = 0; index < 11; index++) {
-      card.gainAbility();
+      card.rollAbility();
     }
 
     expect(card.Abilities.length).toEqual(AllAbilities.length);
@@ -41,7 +42,7 @@ describe('crystalline giant', () => {
     const card = getCard();
     const originalCopyOfAbilities = card.Abilities;
 
-    card.gainAbility();
+    card.rollAbility();
 
     const newCopyOfAbilities = card.Abilities;
 
@@ -53,7 +54,7 @@ describe('crystalline giant', () => {
     expect(card.CanGainAbility).toEqual(true);
 
     for (var index = 0; index < 11; index++) {
-      card.gainAbility();
+      card.rollAbility();
     }
 
     expect(card.CanGainAbility).toEqual(false);
@@ -64,7 +65,7 @@ describe('crystalline giant', () => {
     expect(card.CanGainAbility).toEqual(true);
 
     for (var index = 0; index < 11; index++) {
-      card.gainAbility();
+      card.rollAbility();
     }
 
     expect(card.CanGainAbility).toEqual(false);
@@ -72,6 +73,40 @@ describe('crystalline giant', () => {
     card.reset();
 
     expect(card.Abilities.length).toBe(0);
+  });
+
+  test('history recording', () => {
+    const card = getCard();
+
+    card.addAbility('+1/+1');
+
+    expect(card.History[0]).toEqual({
+      gained: [],
+      history: [],
+      ungained: [
+        'flying',
+        'first strike',
+        'deathtouch',
+        'hexproof',
+        'lifelink',
+        'menace',
+        'reach',
+        'trample',
+        'vigilance',
+        '+1/+1'
+      ]
+    });
+  });
+
+  test('undo', () => {
+    const card = getCard();
+
+    card.addAbility('+1/+1');
+    card.rollAbility();
+
+    card.undo();
+
+    expect(card.Abilities).toEqual(['+1/+1']);
   });
 });
 
@@ -133,11 +168,23 @@ class CrystallineGiantTester {
     return this.wrapper.CanGainAbility;
   }
 
-  gainAbility = () => {
-    this.wrapper.gainAbility();
+  get History(): CrystallineGiantState[] {
+    return this.wrapper.History;
+  }
+
+  rollAbility = () => {
+    this.wrapper.rollAbility();
   };
 
   reset = () => {
     this.wrapper.reset();
+  };
+
+  addAbility = (ability: Ability) => {
+    this.wrapper.addAbility(ability);
+  };
+
+  undo = () => {
+    this.wrapper.undo();
   };
 }

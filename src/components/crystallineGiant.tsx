@@ -8,8 +8,6 @@ import {
 } from '@app/logic/crystallineGiant';
 import { useReducer } from 'react';
 
-const lastAbility = AllAbilities[9];
-
 const View = () => {
   const [selectedAbility, setSelectedAbility] = useState<Ability | ''>('');
   const card = useCrystallineGiant();
@@ -19,7 +17,7 @@ const View = () => {
       Crystalline Giant:&nbsp;
       <button
         onClick={() => {
-          card.gainAbility();
+          card.rollAbility();
         }}
         disabled={!card.CanGainAbility}
         title={
@@ -53,6 +51,7 @@ const View = () => {
           setSelectedAbility(value as Ability)
         }
         value={selectedAbility}
+        disabled={!card.CanGainAbility}
       >
         <option value=""></option>
         {card.UngainedAbilities.map((ability) => (
@@ -61,6 +60,16 @@ const View = () => {
           </option>
         ))}
       </select>
+      &nbsp;
+      <button
+        onClick={() => {
+          card.undo();
+          setSelectedAbility('');
+        }}
+        disabled={!card.CanUndo}
+      >
+        Undo
+      </button>
       &nbsp;
       <button
         onClick={() => {

@@ -61,9 +61,10 @@ export function Pick(abilities: Abilities): Ability {
   return abilities[nextAbilityIndex];
 }
 
-interface CrystallineGiantState {
+export interface CrystallineGiantState {
   ungained: Abilities;
   gained: Abilities;
+  history: CrystallineGiantState[];
 }
 
 export function CrystallineGiantReducer(
@@ -86,7 +87,8 @@ export function CrystallineGiantReducer(
       );
       return {
         gained: [...state.gained, newAbility],
-        ungained
+        ungained,
+        history: [state, ...state.history]
       };
     }
     case 'RESET': {
@@ -98,7 +100,20 @@ export function CrystallineGiantReducer(
       );
       return {
         gained: [...state.gained, message.ability],
-        ungained
+        ungained,
+        history: [state, ...state.history]
+      };
+    }
+    case 'UNDO': {
+      if (state.history.length < 1) {
+        return state;
+      }
+      const { gained, ungained, history } = state.history[0];
+
+      return {
+        gained,
+        ungained,
+        history
       };
     }
     default: {
@@ -110,14 +125,16 @@ export function CrystallineGiantReducer(
 export function CrystallineGiantInitializer(): CrystallineGiantState {
   return {
     gained: [],
-    ungained: AllAbilities
+    ungained: AllAbilities,
+    history: []
   };
 }
 
 export type CrystallineGiantMessages =
   | { action: 'GAIN_ABILITY' }
   | { action: 'RESET' }
-  | { action: 'ADD_ABILITY'; ability: Ability };
+  | { action: 'ADD_ABILITY'; ability: Ability }
+  | { action: 'UNDO' };
 
 export class CrystallineGiant {
   private state: CrystallineGiantState;
@@ -143,7 +160,15 @@ export class CrystallineGiant {
     return this.state.ungained;
   }
 
-  gainAbility = () => {
+  get History(): CrystallineGiantState[] {
+    return this.state.history;
+  }
+
+  get CanUndo(): boolean {
+    return this.state.history.length > 0;
+  }
+
+  rollAbility = () => {
     this.dispatch({ action: 'GAIN_ABILITY' });
   };
 
@@ -156,5 +181,9 @@ export class CrystallineGiant {
       action: 'ADD_ABILITY',
       ability
     });
+  };
+
+  undo = () => {
+    this.dispatch({ action: 'UNDO' });
   };
 }

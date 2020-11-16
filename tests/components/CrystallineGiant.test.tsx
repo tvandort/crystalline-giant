@@ -50,7 +50,7 @@ test('reset enables roll', () => {
   expect(rollButton).not.toBeDisabled();
 });
 
-xit('reset removes abilities', async () => {
+it('reset removes abilities', () => {
   render(<CrystallineGiant />);
 
   const rollButton = screen.getByText('Roll');
@@ -65,13 +65,14 @@ xit('reset removes abilities', async () => {
 
   for (let ability of AllAbilities) {
     const abilityListItem = screen.getByText(ability);
-    expect(abilityListItem).toBeTruthy();
+    expect(abilityListItem.tagName).toEqual('LI');
   }
 
   userEvent.click(screen.getByText('Reset'));
 
   for (let ability of AllAbilities) {
-    const abilityListItem = screen.queryByText(ability);
-    expect(abilityListItem).toBeFalsy();
+    const abilityListItem = screen.getByText(ability);
+
+    expect(abilityListItem.tagName).toEqual('OPTION');
   }
 });
