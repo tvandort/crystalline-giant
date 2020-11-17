@@ -3,7 +3,6 @@ import {
   CrystallineGiantInitializer,
   CrystallineGiantReducer,
   CrystallineGiant as CrystallineGiantState,
-  AllAbilities,
   Ability
 } from '@app/logic/crystallineGiant';
 import { useReducer } from 'react';
@@ -11,6 +10,11 @@ import { useReducer } from 'react';
 const View = () => {
   const [selectedAbility, setSelectedAbility] = useState<Ability | ''>('');
   const card = useCrystallineGiant();
+
+  const resetAnd = (action: () => void) => {
+    setSelectedAbility('');
+    action();
+  };
 
   return (
     <div>
@@ -20,11 +24,7 @@ const View = () => {
           card.rollAbility();
         }}
         disabled={!card.CanGainAbility}
-        title={
-          card.CanGainAbility
-            ? 'Roll to gain another ability.'
-            : 'Cannot roll; all abilities gained.'
-        }
+        title="Roll to gain another ability."
       >
         Roll
       </button>
@@ -32,15 +32,11 @@ const View = () => {
       <button
         onClick={() => {
           if (selectedAbility !== '') {
-            card.addAbility(selectedAbility);
+            resetAnd(() => card.addAbility(selectedAbility));
           }
         }}
         disabled={!card.CanGainAbility || selectedAbility === ''}
-        title={
-          card.CanGainAbility
-            ? 'Click to manually add an ability.'
-            : 'Cannot gain any more abilities.'
-        }
+        title="Click to manually add an ability."
       >
         Add Ability
       </button>
@@ -63,8 +59,9 @@ const View = () => {
       &nbsp;
       <button
         onClick={() => {
-          card.undo();
-          setSelectedAbility('');
+          resetAnd(() => {
+            card.undo();
+          });
         }}
         disabled={!card.CanUndo}
       >
@@ -73,8 +70,9 @@ const View = () => {
       &nbsp;
       <button
         onClick={() => {
-          card.reset();
-          setSelectedAbility('');
+          resetAnd(() => {
+            card.reset();
+          });
         }}
       >
         Reset
