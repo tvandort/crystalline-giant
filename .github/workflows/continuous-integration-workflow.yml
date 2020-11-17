@@ -7,6 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Environment Variables
+        run: echo Setting insecure shit
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       - uses: actions/checkout@v2
       - name: nodenv/node-version
         uses: nodenv/actions-node-version@v2.0.7
