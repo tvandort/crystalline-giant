@@ -8,9 +8,7 @@ jobs:
 
     steps:
       - name: Environment Variables
-        run: echo Setting insecure shit
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: echo "ACTIONS_ALLOW_UNSECURE_COMMANDS=true" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - name: nodenv/node-version
         uses: nodenv/actions-node-version@v2.0.7
